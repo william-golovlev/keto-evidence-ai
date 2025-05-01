@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Chroma data
+chroma_data/
+chroma_data.zip
+
 # Distribution / packaging
 .Python
 build/

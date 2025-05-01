@@ -1,0 +1,33 @@
+    # Core LangChain framework
+    langchain
+
+    # Document Loaders & Parsers
+    pypdf                
+    beautifulsoup4           
+    unstructured[pdf]          
+    lxml                       
+
+    # Vector Store (ChromaDB)
+    chromadb
+    langchain-chroma
+
+    # LLM & Embedding Integrations
+    # Google Gemini
+    google-generativeai
+    langchain-google-genai
+    # OpenAI
+    openai
+    langchain-openai
+    tiktoken                   # Tokenizer often needed for OpenAI models
+    # Ollama
+    # langchain-ollama # Using community version due to previous import issues
+    langchain-community        # Includes many integrations like Ollama
+
+    # Utilities
+    python-dotenv            
+    tqdm                       # For progress bars
+    huggingface_hub          
+
+    # Note: unstructured[pdf] installs extra libraries needed for PDF processing.
+    # Ensure you are using Python 3.11 or 3.12 for easier installation on Windows.
+    

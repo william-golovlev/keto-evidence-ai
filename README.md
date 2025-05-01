@@ -1,65 +1,83 @@
-# Keto Science RAG (KetoSci AI)
+    # Keto Science RAG Project
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) AI assistant using Retrieval-Augmented Generation (RAG) to answer questions based on the public Keto Science Zotero Database.
+    Uses research papers (over 500) to answer specific questions to users about the ketogenic diet and meat.
 
-**Goal:** To provide enthusiasts and researchers with quick, evidence-based answers derived directly from studies listed in the [KetoScienceDatabase Zotero Library](https://www.zotero.org/groups/2466685/ketosciencedatabase/library).
+    ## Setup
 
-## Features
+    1.  **Clone the repository:**
+        ```bash
+        git clone [https://github.com/Willy988/keto-science-rag-chromadb.git](https://github.com/Willy988/keto-science-rag-chromadb.git)
+        cd keto-science-rag-chromadb
+        ```
+    2.  **Set up Python environment:** (Python 3.11 or 3.12 recommended)
+        ```bash
+        # Example using Python 3.12
+        py -3.12 -m venv .venv
+        # Activate (use command for your shell)
+        .venv\Scripts\activate.bat
+        ```
+    3.  **Install Python dependencies:**
+        ```bash
+        pip install -r requirements.txt
+        ```
+    4.  **Install Ollama:** (Required if using Ollama provider) Follow instructions at [https://ollama.com/](https://ollama.com/).
+    5.  **Download Ollama Models:** (Required if using Ollama provider)
+        ```bash
+        ollama pull nomic-embed-text
+        ollama pull llama3
+        ```
+    6.  **Configure Environment:** Copy `.env.example` (you should create this) to `.env` and fill in your settings:
+        * Set `LLM_PROVIDER` (e.g., "ollama", "google").
+        * Add API keys if using cloud providers (`GOOGLE_API_KEY`).
+        * Verify `CHROMA_PERSIST_DIR` (usually `./chroma_data`).
+        * Verify `CHROMA_COLLECTION_NAME` (e.g., `research_papers`).
 
-* Retrieves relevant studies and text excerpts from the Zotero library based on user questions.
-* Uses a local Large Language Model (LLM) via [Ollama](https://ollama.com/) to generate answers based *only* on the retrieved context.
-* Provides source information for generated answers (e.g., citation key).
-* Designed to run locally, ensuring data privacy and avoiding API costs.
-* Open-source and community-driven.
+    ## Usage: Querying the Database
 
-## How it Works
+    There are two ways to get the necessary ChromaDB database:
 
-This project implements a Retrieval-Augmented Generation (RAG) pipeline:
+    **Option A: Download Pre-Built Database (Recommended)**
 
-1.  **Data Acquisition:** Scripts scrape metadata and abstracts from the public Zotero library web view, through the Keto Science Database (https://www.zotero.org/groups/2466685/ketosciencedatabase/)
-2.  **Indexing:** Extracted text is cleaned, split into chunks, and converted into vector embeddings using a sentence transformer model. These embeddings are stored in a local vector database (e.g., ChromaDB).
-3.  **Retrieval:** When a user asks a question, it's embedded, and the vector database is searched for the most relevant text chunks.
-4.  **Generation:** The retrieved chunks and the original question are passed to a local LLM (run via Ollama) to generate a synthesized answer based *only* on the provided context.
+    1.  Download `chroma_data.zip` from the Hugging Face Hub: [https://huggingface.co/datasets/Willy988/keto-science-rag-chromadb](https://huggingface.co/datasets/Willy988/keto-science-rag-chromadb)
+    2.  Extract the zip file.
+    3.  Place the resulting `chroma_data` folder in the root of this project directory.
+    4.  Ensure `CHROMA_PERSIST_DIR=./chroma_data` is set in your `.env` file.
 
-## Installation
+    **Option B: Build Database Locally (Requires Source Documents & External Tools)**
 
-*(Instructions will be added here once the core scripts are developed. This will likely involve:)*
+    If you want to build the database from source documents yourself using `ingest.py`:
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/YourUsername/keto-science-rag.git](https://github.com/YourUsername/keto-science-rag.git)
-    cd keto-science-rag
+    1.  **Place Source Documents:** Put your PDF and HTML files inside a directory (e.g., create a folder named `source_docs`) within the project.
+    2.  **Update `.env`:** Set `DATA_DIR` in your `.env` file to point to your source document folder (e.g., `DATA_DIR=./source_docs`).
+    3.  **(IMPORTANT) Install External PDF Tools:** For robust processing of diverse PDF files, install **Poppler** and **Tesseract OCR** and add them to your system PATH:
+        * **Poppler:** Used for reliable text extraction.
+            * Windows builds: [oschwartz10612/poppler-windows Releases](https://github.com/oschwartz10612/poppler-windows/releases)
+            * *Add the extracted `Library\bin` folder to PATH.*
+            * *Verify (new terminal): `pdftotext -v`*
+        * **Tesseract OCR:** Used for extracting text from scanned PDFs.
+            * Windows installers: [UB-Mannheim/tesseract Wiki](https://github.com/UB-Mannheim/tesseract/wiki)
+            * *Ensure Tesseract is added to PATH (add install folder containing `tesseract.exe`).*
+            * *Verify (new terminal): `tesseract --version`*
+        * *(Restart terminal after modifying PATH)*.
+    4.  **Run Ingestion Script:**
+        ```bash
+        python ingest.py
+        ```
+        *(This will create the database in the location specified by `CHROMA_PERSIST_DIR`)*
+
+    **Running Queries**
+
+    Once the database is ready (either downloaded or built) and your `.env` is configured:
+
+    1.  Ensure your chosen LLM provider (Ollama server or cloud) is running/accessible.
+    2.  Run the query script:
+        ```bash
+        python query.py
+        ```
+    3.  Enter your questions at the prompt. Type 'quit' to exit.
+
+    ## Docker Usage
+
+    (Instructions for building and running with Docker will be added here later)
+
     ```
-2.  **Set up Python environment:** (e.g., using `venv`)
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    ```
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  **Install Ollama:** Follow the instructions at [https://ollama.com/](https://ollama.com/).
-5.  **Download an LLM via Ollama:** (e.g., Mistral, Llama 3 8B)
-    ```bash
-    ollama pull mistral
-    ```
-6.  **(Optional) Download Embedding Model:** (Instructions if not automatically handled by libraries)
-
-## Usage
-
-1.  **Add API key** Use your API key i.e. OpenAI key to make the calls needed
-2.  ** --OR-- Use Ollama** Locally. 
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit Pull Requests or open Issues to suggest improvements, report bugs, or add features.
-
-*(Add more specific contribution guidelines if desired, e.g., coding style, testing requirements)*
-
-## License
-
-This project is licensed under the [MIT License](LICENSE). ## Disclaimer
-
-This tool provides information based on the content within the specified Zotero library. It is not a substitute for professional medical advice. Always consult with a qualified healthcare provider for any health concerns or before making any decisions related to your health or treatment. Scientific literature can be complex and sometimes contradictory; this tool aims to retrieve relevant information but does not guarantee the validity or applicability of the findings to individual circumstances.
-
